@@ -15,7 +15,9 @@
 
 本项目通过以下策略减小体积：
 
-- 使用 `mcr.microsoft.com/dotnet/aspnet:8.0-alpine` 作为运行时基础镜像。
+- 采用多阶段构建：
+  - 构建阶段：`mcr.microsoft.com/dotnet/sdk:9.0-alpine`
+  - 运行阶段：`mcr.microsoft.com/dotnet/aspnet:8.0-alpine`（最终镜像基座）
 - 仅安装最小运行依赖：
   - `icu-libs`
   - `libssl3`
@@ -27,6 +29,8 @@
   - VAAPI / NVENC / Intel QSV
   - 视频 codec 相关工具链
 - 发布后清理调试与示例文件（如 `*.pdb`、`*.xml`、sample 目录等）。
+
+> 版本说明：当前 Dockerfile 是 **SDK 9.0 + ASP.NET Runtime 8.0** 组合。判断镜像体积与运行环境时，以运行阶段的 `aspnet:8.0-alpine` 为准。
 
 > 预估镜像体积：**200MB - 280MB**（具体取决于上游依赖变化和构建时刻）。
 
