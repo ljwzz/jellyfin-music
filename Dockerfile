@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS builder
+FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS builder
 ARG JELLYFIN_VERSION=10.11.6
 WORKDIR /src
 RUN apk add --no-cache git icu-data-full
@@ -12,7 +12,7 @@ RUN dotnet publish Jellyfin.Server \
   -p:PublishSingleFile=false \
   -p:SelfContained=false
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS runtime
 ARG JELLYFIN_VERSION=10.11.6
 
 RUN addgroup -g 109 -S jellyfin \

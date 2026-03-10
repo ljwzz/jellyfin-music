@@ -16,8 +16,8 @@
 本项目通过以下策略减小体积：
 
 - 采用多阶段构建：
-  - 构建阶段：`mcr.microsoft.com/dotnet/sdk:8.0-alpine`
-  - 运行阶段：`mcr.microsoft.com/dotnet/aspnet:8.0-alpine`（最终镜像基座）
+  - 构建阶段：`mcr.microsoft.com/dotnet/sdk:9.0-alpine`
+  - 运行阶段：`mcr.microsoft.com/dotnet/aspnet:9.0-alpine`（最终镜像基座）
 - 仅安装最小运行依赖：
   - `icu-libs`
   - `libssl3`
@@ -30,7 +30,7 @@
   - 视频 codec 相关工具链
 - 发布后清理调试与示例文件（如 `*.pdb`、`*.xml`、sample 目录等）。
 
-> 版本说明：当前 Dockerfile 统一使用 **.NET 8（SDK 8.0 + ASP.NET Runtime 8.0）**，与 Jellyfin 10.11.6 的运行时目标保持一致。
+> 版本说明：为避免 8.0 构建报错，当前 Dockerfile 统一升级为 **.NET 9（SDK 9.0 + ASP.NET Runtime 9.0）**。
 
 > 预估镜像体积：**200MB - 280MB**（具体取决于上游依赖变化和构建时刻）。
 
