@@ -18,7 +18,7 @@ ARG JELLYFIN_VERSION=10.11.6
 RUN addgroup -g 109 -S jellyfin \
     && adduser -u 102 -S jellyfin -G jellyfin \
     && apk add --no-cache \
-      libicu \
+      icu-libs \
       libssl3 \
       ca-certificates \
       fontconfig
