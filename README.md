@@ -27,17 +27,17 @@
 ## 目录结构
 
 ```text
-jellyfin-music-server/
-  Dockerfile
-  docker-compose.yml
-  build.sh
-  .github/workflows/build.yml
-  README.md
+.
+├── Dockerfile
+├── docker-compose.yml
+├── build.sh
+├── .github/workflows/build.yml
+└── README.md
 ```
 
 ## 本地构建并导出镜像
 
-在 `jellyfin-music-server` 目录中执行：
+在项目根目录执行：
 
 ```bash
 ./build.sh
