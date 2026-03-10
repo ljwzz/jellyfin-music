@@ -1,0 +1,17 @@
+services:
+  jellyfin:
+    image: "jellyfin-music:10.11.6"
+    container_name: jellyfin
+    user: "102:109"
+    ports:
+      - '127.0.0.1:18096:8096'
+    volumes:
+      - /opt/jellyfin/config:/config
+      - /opt/jellyfin/cache:/cache
+      - type: bind
+        source: /media
+        target: /media
+        read_only: true
+    restart: 'unless-stopped'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
