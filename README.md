@@ -1,8 +1,8 @@
-# Jellyfin Music Server (10.11.6)
+# Jellyfin Music Server
 
-这是一个针对 **Jellyfin Server 10.11.6** 的“音乐专用精简镜像”工程。
+这是一个针对 **Jellyfin Server** 的“音乐专用精简镜像”工程。
 
-目标是仅保留音乐播放所需能力，移除视频转码与 GPU 相关依赖，并通过 GitHub Actions 自动构建可分发的 `docker save` 压缩包 artifact。
+目标是仅保留音乐播放所需能力，移除视频转码与 GPU 相关依赖，自动跟踪 Jellyfin 官方最新版本，并通过 GitHub Actions 自动构建并发布到 Releases。
 
 ## 特性
 
@@ -31,9 +31,11 @@
   - 视频 codec 相关工具链
 - 发布后清理调试与示例文件（如 `*.pdb`、`*.xml`、sample 目录等）。
 
-> 版本说明：为避免 8.0 构建报错，当前 Dockerfile 统一升级为 **.NET 9（SDK 9.0 + ASP.NET Runtime 9.0）**。
-
-> 预估镜像体积：**250MB - 350MB**（含 ffmpeg，具体取决于上游依赖变化和构建时刻）。
+> **版本策略**：本项目自动跟踪 Jellyfin 官方最新版本，无需手动更新版本号。
+>
+> **镜像体积**：**250MB - 350MB**（含 ffmpeg，具体取决于上游依赖变化和构建时刻）。
+>
+> **技术栈**：基于 .NET 9（SDK 9.0 + ASP.NET Runtime 9.0）构建。
 
 ## 目录结构
 
@@ -48,28 +50,18 @@
 
 ## 快速开始
 
-### 1) 本地构建并导出镜像
+### 方式一：从 Releases 下载（推荐）
 
-在项目根目录执行：
-
-```bash
-./build.sh
-```
-
-该脚本会：
-
-1. 构建镜像：`jellyfin-music:10.11.6`
-2. 导出压缩包：`jellyfin-music-10.11.6.tar.gz`
-
-### 2) 导入镜像
+访问 [Releases 页面](https://github.com/OWNER/REPO/releases) 下载最新版本：
 
 ```bash
-gzip -dc jellyfin-music-10.11.6.tar.gz | docker load
-```
+# 下载最新版本
+curl -L -o jellyfin-music.tar.gz https://github.com/OWNER/REPO/releases/latest/download/jellyfin-music-LATEST_VERSION.tar.gz
 
-### 3) 启动容器（docker run）
+# 导入镜像
+gzip -dc jellyfin-music.tar.gz | docker load
 
-```bash
+# 启动容器
 docker run -d \
   --name jellyfin \
   --user 102:109 \
@@ -78,36 +70,57 @@ docker run -d \
   -v /opt/jellyfin/cache:/cache \
   -v /media:/media:ro \
   --restart unless-stopped \
-  jellyfin-music:10.11.6
+  jellyfin-music:latest
 ```
 
-### 4) 使用 docker compose
+### 方式二：本地构建
+
+如果你想本地构建特定版本：
 
 ```bash
+./build.sh
+```
+
+该脚本会自动查询 Jellyfin 最新版本并构建。
+
+### 使用 docker compose
+
+```bash
+# 先修改 docker-compose.yml 中的镜像版本
 docker compose up -d
 ```
 
 `docker-compose.yml` 已提供与 `docker run` 等效的配置。
 
-## GitHub Actions 产物
+## 自动版本跟踪与发布
 
-工作流文件：`.github/workflows/build.yml`
+本项目自动跟踪 Jellyfin 官方最新版本：
 
-触发方式：
+- **查询方式**：通过 GitHub API 获取 `jellyfin/jellyfin` 最新 Release
+- **构建触发**：每周日自动检查新版本，或手动触发
+- **发布位置**：构建产物直接发布到 [GitHub Releases](https://github.com/OWNER/REPO/releases)
 
-- `push`
-- `workflow_dispatch`
+### GitHub Actions 工作流
+
+文件：`.github/workflows/build.yml`
+
+触发条件：
+
+- `push` 到 main/master 分支
+- `workflow_dispatch` 手动触发
+- `schedule` 每周日自动检查
 
 执行流程：
 
-1. Checkout
-2. Setup Docker Buildx
-3. 构建镜像 `jellyfin-music:10.11.6`
-4. `docker save | gzip > jellyfin-music.tar.gz`
-5. 上传 artifact：`jellyfin-music-docker-image`
+1. 查询 Jellyfin 最新版本
+2. 构建镜像（传入动态版本号）
+3. 打包为 tar.gz
+4. 创建 GitHub Release 并上传产物
 
-最终 artifact 文件名：
+### 本地构建特定版本
 
-- `jellyfin-music.tar.gz`
+如需构建特定版本：
 
-> 注意：本地 `build.sh` 产物名是 `jellyfin-music-10.11.6.tar.gz`，与 CI 产物名不同，属预期行为。
+```bash
+docker build --build-arg JELLYFIN_VERSION=10.11.6 -t jellyfin-music:10.11.6 .
+```

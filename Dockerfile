@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 
 FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS builder
-ARG JELLYFIN_VERSION=10.11.6
+ARG JELLYFIN_VERSION
 WORKDIR /src
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 RUN apk add --no-cache git icu-data-full
@@ -14,7 +14,7 @@ RUN dotnet publish Jellyfin.Server \
   -p:SelfContained=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS runtime
-ARG JELLYFIN_VERSION=10.11.6
+ARG JELLYFIN_VERSION
 
 RUN addgroup -g 109 -S jellyfin \
     && adduser -u 102 -S jellyfin -G jellyfin \
