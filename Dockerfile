@@ -1,5 +1,14 @@
 # syntax=docker/dockerfile:1.7
 
+# Stage 1: Build Jellyfin Web
+FROM node:20-alpine AS web-builder
+ARG JELLYFIN_VERSION
+WORKDIR /src/web
+RUN apk add --no-cache git
+RUN git clone --depth 1 --branch "v${JELLYFIN_VERSION}" https://github.com/jellyfin/jellyfin-web.git .
+RUN npm ci && npm run build:production
+
+# Stage 2: Build Jellyfin Server
 FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS builder
 ARG JELLYFIN_VERSION
 WORKDIR /src
@@ -29,6 +38,7 @@ RUN addgroup -g 109 -S jellyfin \
 
 WORKDIR /app
 COPY --from=builder /out/ /app/
+COPY --from=web-builder /src/web/dist/ /app/jellyfin-web/
 
 RUN rm -rf /app/wwwroot/videos /app/Samples /app/sample* \
     && find /app -type f \( -name '*.pdb' -o -name '*.xml' \) -delete
