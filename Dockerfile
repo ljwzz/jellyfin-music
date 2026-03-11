@@ -3,6 +3,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS builder
 ARG JELLYFIN_VERSION=10.11.6
 WORKDIR /src
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 RUN apk add --no-cache git icu-data-full
 RUN git clone --depth 1 --branch "v${JELLYFIN_VERSION}" https://github.com/jellyfin/jellyfin.git .
 RUN dotnet publish Jellyfin.Server \
@@ -18,23 +19,23 @@ ARG JELLYFIN_VERSION=10.11.6
 RUN addgroup -g 109 -S jellyfin \
     && adduser -u 102 -S jellyfin -G jellyfin \
     && apk add --no-cache \
+      ffmpeg \
       icu-libs \
       libssl3 \
       ca-certificates \
-      fontconfig
+      fontconfig \
+    && mkdir -p /cache /config /media \
+    && chmod 777 /cache /config /media
 
 WORKDIR /app
 COPY --from=builder /out/ /app/
 
-# Keep only runtime-relevant files for a music-only server footprint.
-RUN rm -rf /app/wwwroot/videos /app/Samples /app/sample* /app/ffmpeg* \
+RUN rm -rf /app/wwwroot/videos /app/Samples /app/sample* \
     && find /app -type f \( -name '*.pdb' -o -name '*.xml' \) -delete
 
-ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
-    JELLYFIN_DATA_DIR=/config \
-    JELLYFIN_CACHE_DIR=/cache
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 VOLUME ["/config", "/cache", "/media"]
 EXPOSE 8096
 USER jellyfin:jellyfin
-ENTRYPOINT ["dotnet", "Jellyfin.Server.dll"]
+ENTRYPOINT ["dotnet", "jellyfin.dll", "--datadir", "/config", "--cachedir", "/cache"]

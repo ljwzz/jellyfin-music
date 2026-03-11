@@ -7,8 +7,9 @@
 ## 特性
 
 - 基于 Alpine 运行时镜像，尽可能减少镜像体积。
-- 仅保留音乐服务场景所需运行依赖。
-- 默认去除视频相关目录、示例文件和调试符号。
+- 支持音乐转码（FLAC → MP3 等），适配不同播放场景。
+- 包含 ffmpeg 用于音频格式转换和码率调整。
+- 移除视频相关目录、示例文件和调试符号。
 - 提供本地一键构建脚本与 GitHub Actions 自动构建流程。
 
 ## 为什么比官方镜像更小
@@ -19,12 +20,12 @@
   - 构建阶段：`mcr.microsoft.com/dotnet/sdk:9.0-alpine`
   - 运行阶段：`mcr.microsoft.com/dotnet/aspnet:9.0-alpine`（最终镜像基座）
 - 仅安装最小运行依赖：
+  - `ffmpeg`（用于音频转码）
   - `icu-libs`
   - `libssl3`
   - `ca-certificates`
   - `fontconfig`
 - 不包含以下组件：
-  - `ffmpeg`
   - GPU 驱动
   - VAAPI / NVENC / Intel QSV
   - 视频 codec 相关工具链
@@ -32,7 +33,7 @@
 
 > 版本说明：为避免 8.0 构建报错，当前 Dockerfile 统一升级为 **.NET 9（SDK 9.0 + ASP.NET Runtime 9.0）**。
 
-> 预估镜像体积：**200MB - 280MB**（具体取决于上游依赖变化和构建时刻）。
+> 预估镜像体积：**250MB - 350MB**（含 ffmpeg，具体取决于上游依赖变化和构建时刻）。
 
 ## 目录结构
 
