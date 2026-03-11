@@ -42,7 +42,7 @@ jobs:
           docker save jellyfin-music:${{ steps.get_version.outputs.version_without_v }} | gzip > jellyfin-music-${{ steps.get_version.outputs.version_without_v }}.tar.gz
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.get_version.outputs.version }}
           name: Jellyfin Music ${{ steps.get_version.outputs.version }}
